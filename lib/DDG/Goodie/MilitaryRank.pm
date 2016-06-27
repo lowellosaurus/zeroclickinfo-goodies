@@ -44,7 +44,7 @@ my $PATTERNS = {
         warrant  => '(?:chiefs?\s+)?warrants?(?:\s+officers?)?',
         officer  => 'officers?|generals?(?:\s+officers?)?',
     },
-    keywords => [('rank', 'ranks', 'rate', 'rates', 'rank structure', 'insignia', 'insignias', 'symbols')],
+    keywords => [('rank structure', 'rank', 'ranks', 'rate', 'rates', 'insignia', 'insignias', 'symbols')],
 };
 
 my $country_pat = join '|', values %{$PATTERNS->{countries}};
@@ -52,38 +52,30 @@ my $branch_pat  = join '|', values %{$PATTERNS->{branches}};
 my $grade_pat   = join '|', values %{$PATTERNS->{grades}};
 my $keywords    = join '|', @{$PATTERNS->{keywords}};
 
-my $complete_regex = qr/^(?:($country_pat)\s+)?($branch_pat)\s+(?:(?:$grade_pat)(?:\s+))?(?:(?:$keywords)(?:\s+))?\w*/i;
+my $complete_regex = qr/^(?:($country_pat)\s+)?($branch_pat)\s+(?:(?:$grade_pat)(?:\s+))?(?:$keywords)(?:\s+(.*))?$/i;
 
-triggers end => @{$PATTERNS->{keywords}};
+triggers query_clean => $complete_regex;
 
 handle words => sub {
-    my $query = lc $_;
-    my ($country, $branch) = $_ =~ $complete_regex;
+    my ($country, $branch, $rank) = $_ =~ $complete_regex;
 
     return unless $branch;
-
-    my $selected_item_index = -1;
 
     # TODO: Localize this default to the country of the searcher.
     $country = 'us' unless $country; # Default $country to us. 
     $country = get_key_from_pattern_hash($PATTERNS->{countries}, $country);
     $branch  = get_key_from_pattern_hash($PATTERNS->{branches}, $branch);
 
-    my $text_response = join ' ', ($DISPLAY_NAME_FOR->{$country}, $DISPLAY_NAME_FOR->{$branch}, 'Rank');
-
     my $structured_answer = $DATA->{$country}->{$branch};
-    foreach my $rank (@{$structured_answer->{data}}) {
-        $rank->{image} = '/share/goodie/military_rank/' . $goodie_version . '/no_insignia.svg'
-            unless $rank->{image};
-    }
+    my $selected_item_index = -1;
+    for my $i (0 .. $#{$structured_answer->{data}}) {
+        last unless $structured_answer->{data}->[$i];
+    
+        $structured_answer->{data}->[$i]->{image} = '/share/goodie/military_rank/' . $goodie_version . '/no_insignia.svg'
+            unless $structured_answer->{data}->[$i]->{image};
 
-    my @structured_answer_data = @{$structured_answer->{data}};
-    for my $i (0 .. $#structured_answer_data) {
-        my $subtitle = $structured_answer_data[$i]->{altSubtitle};
-
-        if ($query =~ /($subtitle)/i) {
-            $selected_item_index = $i;
-        }
+        $selected_item_index = $i
+            if $rank && $rank =~ qr/$structured_answer->{data}->[$i]->{title}|$structured_answer->{data}->[$i]->{altSubtitle}/i;
     }
 
     $structured_answer->{templates} = {
@@ -95,10 +87,10 @@ handle words => sub {
         elClass  => { tileMedia => 'tile__media--pr' },
     };
 
-    $structured_answer->{meta} = {
-        selectedItem => $selected_item_index,
-        scrollToSelectedItem => true
-    };
+    $structured_answer->{meta}->{selectedItem} = $selected_item_index;
+    $structured_answer->{meta}->{scrollToSelectedItem} = 1;
+
+    my $text_response = join ' ', ($DISPLAY_NAME_FOR->{$country}, $DISPLAY_NAME_FOR->{$branch}, 'Rank');
 
     return $text_response, structured_answer => $structured_answer;
 };

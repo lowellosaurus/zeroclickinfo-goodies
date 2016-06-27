@@ -2,6 +2,8 @@
 
 use strict;
 use warnings;
+
+use Clone 'clone';
 use Test::More;
 use Test::Deep;
 use DDG::Test::Goodie;
@@ -13,8 +15,10 @@ my @us_army = (
     'United States Army Rank',
     structured_answer => {
         meta => {
-            sourceName => 'Wikipedia',
-            sourceUrl  => 'http://wikipedia.org/wiki/United_States_Army_enlisted_rank_insignia'
+            sourceName   => 'Wikipedia',
+            sourceUrl    => 'http://wikipedia.org/wiki/United_States_Army_enlisted_rank_insignia',
+            selectedItem => -1,
+            scrollToSelectedItem => 1
         },
         data => [
             {
@@ -209,10 +213,6 @@ my @us_army = (
             item_detail => 0,
             variants => { tile => 'narrow' },
             elClass  => { tileMedia => 'tile__media--pr' },
-        },
-        meta => {
-            selectedItem => -1,
-            scrollToSelectedItem => 1
         }
     }
 );
@@ -220,8 +220,10 @@ my @pl_af = (
     'Poland Air Force Rank',
     structured_answer => {
         meta => {
-            sourceName => 'Wikipedia',
-            sourceUrl  => 'http://en.wikipedia.org/wiki/Polish_Armed_Forces_rank_insignia'
+            sourceName   => 'Wikipedia',
+            sourceUrl    => 'http://en.wikipedia.org/wiki/Polish_Armed_Forces_rank_insignia',
+            selectedItem => -1,
+            scrollToSelectedItem => 1
         },
         data => [
             {
@@ -357,13 +359,15 @@ my @pl_af = (
             item_detail => 0,
             variants => { tile => 'narrow' },
             elClass  => { tileMedia => 'tile__media--pr' },
-        },
-        meta => {
-            selectedItem => -1,
-            scrollToSelectedItem => 1
         }
     }
 );
+
+my @us_army_cpt = @{ clone \@us_army };
+$us_army_cpt[2]->{meta}->{selectedItem} = 20;
+
+my @us_army_col = @{ clone \@us_army };
+$us_army_cpt[2]->{meta}->{selectedItem} = 23;
 
 ddg_goodie_test(
     [qw( DDG::Goodie::MilitaryRank )],
@@ -391,11 +395,15 @@ ddg_goodie_test(
     'polish air force generals rank' => test_zci(@pl_af),
     'polish air force officer rank'  => test_zci(@pl_af),
 
-    # Keyworm "rank" variations.
+    # Keyword "rank" variations.
     'us army rank structure' => test_zci(@us_army),
     'us army rates'          => test_zci(@us_army),
     'polish air force rank insignias' => test_zci(@pl_af),
     'polish air force symbols' => test_zci(@pl_af),
+    
+    # Scroll to rank included in query.
+    'united states army rank captain' => test_zci(@us_army_cpt),
+    'united states army rank col' => test_zci(@us_army_col),
 
     # Queries that do not trigger MilitaryRank:
     # - Improper order.
