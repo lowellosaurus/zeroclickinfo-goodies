@@ -17,6 +17,8 @@ my @us_army = (
         meta => {
             sourceName   => 'Wikipedia',
             sourceUrl    => 'http://wikipedia.org/wiki/United_States_Army_enlisted_rank_insignia'
+            selectedItem => -1,
+            scrollToSelectedItem => 1
         },
         data => [
             {
@@ -211,10 +213,6 @@ my @us_army = (
             item_detail => 0,
             variants => { tile => 'narrow' },
             elClass  => { tileMedia => 'tile__media--pr' },
-        },
-        meta => {
-            selectedItem => -1,
-            scrollToSelectedItem => 1
         }
     }
 );
@@ -223,7 +221,9 @@ my @pl_af = (
     structured_answer => {
         meta => {
             sourceName   => 'Wikipedia',
-            sourceUrl    => 'http://en.wikipedia.org/wiki/Polish_Armed_Forces_rank_insignia'
+            sourceUrl    => 'http://en.wikipedia.org/wiki/Polish_Armed_Forces_rank_insignia',
+            selectedItem => -1,
+            scrollToSelectedItem => 1
         },
         data => [
             {
@@ -359,10 +359,6 @@ my @pl_af = (
             item_detail => 0,
             variants => { tile => 'narrow' },
             elClass  => { tileMedia => 'tile__media--pr' },
-        }
-        meta => {
-            selectedItem => -1,
-            scrollToSelectedItem => 1
         }
     }
 );
