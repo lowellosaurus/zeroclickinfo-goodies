@@ -44,24 +44,18 @@ my $PATTERNS = {
         warrant  => '(?:chiefs?\s+)?warrants?(?:\s+officers?)?',
         officer  => 'officers?|generals?(?:\s+officers?)?',
     },
-    keywords => [('rank', 'ranks', 'rate', 'rates', 'rank structure', 'insignia', 'insignias', 'symbols')],
 };
 
 my $country_pat = join '|', values %{$PATTERNS->{countries}};
 my $branch_pat  = join '|', values %{$PATTERNS->{branches}};
-my $grade_pat   = join '|', values %{$PATTERNS->{grades}};
-my $keywords    = join '|', @{$PATTERNS->{keywords}};
 
-my $complete_regex = qr/^(?:($country_pat)\s+)?($branch_pat)\s+(?:(?:$grade_pat)(?:\s+))?(?:$keywords)(?:\s+(.*))?$/i;
-
-triggers query_clean => $complete_regex;
+triggers any => ('rank', 'ranks', 'rate', 'rates', 'rank structure', 'insignia', 'insignias', 'symbols');
 
 handle words => sub {
-    my ($country, $branch, $rank) = $_ =~ $complete_regex;
+    my $query = join ' ', @_;
+    my ($country, $branch) = $query =~ qr/^(?:($country_pat)\s+)?($branch_pat)/i;
 
     return unless $branch;
-
-    my $selected_item_index = -1;
 
     # TODO: Localize this default to the country of the searcher.
     $country = 'us' unless $country; # Default $country to us. 
@@ -69,14 +63,18 @@ handle words => sub {
     $branch  = get_key_from_pattern_hash($PATTERNS->{branches}, $branch);
 
     my $structured_answer = $DATA->{$country}->{$branch};
+    $structured_answer->{meta}->{selectedItem} = -1;
+    $structured_answer->{meta}->{scrollToSelectedItem} = 1;
     for my $i (0 .. $#{$structured_answer->{data}}) {
         last unless $structured_answer->{data}->[$i];
     
+        # Insert default "no insignia" image for ranks with no insignia.
         $structured_answer->{data}->[$i]->{image} = '/share/goodie/military_rank/' . $goodie_version . '/no_insignia.svg'
             unless $structured_answer->{data}->[$i]->{image};
-
-        $selected_item_index = $i
-            if $rank && $rank =~ qr/$structured_answer->{data}->[$i]->{title}|$structured_answer->{data}->[$i]->{altSubtitle}/i;
+        
+        # If the search query included a specific rank, set selectedItem to that rank's index.
+        $structured_answer->{meta}->{selectedItem} = $i
+            if $query =~ qr/$structured_answer->{data}->[$i]->{title}|$structured_answer->{data}->[$i]->{altSubtitle}/i;
     }
 
     $structured_answer->{templates} = {
