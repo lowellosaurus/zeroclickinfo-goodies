@@ -86,9 +86,6 @@ handle words => sub {
         elClass  => { tileMedia => 'tile__media--pr' },
     };
 
-    $structured_answer->{meta}->{selectedItem} = $selected_item_index;
-    $structured_answer->{meta}->{scrollToSelectedItem} = 1;
-
     my $text_response = join ' ', ($DISPLAY_NAME_FOR->{$country}, $DISPLAY_NAME_FOR->{$branch}, 'Rank');
 
     return $text_response, structured_answer => $structured_answer;
