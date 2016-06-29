@@ -363,11 +363,20 @@ my @pl_af = (
     }
 );
 
+my @us_army_sgt = @{ clone \@us_army };
+$us_army_sgt[2]->{meta}->{selectedItem} = 5;
+
+my @us_army_cw5 = @{ clone \@us_army };
+$us_army_cw5[2]->{meta}->{selectedItem} = 17;
+
 my @us_army_cpt = @{ clone \@us_army };
 $us_army_cpt[2]->{meta}->{selectedItem} = 20;
 
 my @us_army_col = @{ clone \@us_army };
-$us_army_cpt[2]->{meta}->{selectedItem} = 23;
+$us_army_col[2]->{meta}->{selectedItem} = 23;
+
+my @pl_af_gen = @{ clone \@pl_af };
+$pl_af_gen[2]->{meta}->{selectedItem} = 20;
 
 ddg_goodie_test(
     [qw( DDG::Goodie::MilitaryRank )],
@@ -389,29 +398,34 @@ ddg_goodie_test(
     'polish af rank'         => test_zci(@pl_af),
 
     # Include option rank/grade groupings.
-    'us army chief warrant officer rank' => test_zci(@us_army),
-    'us army warrant rank'               => test_zci(@us_army),
-    'us army enlisted rank'              => test_zci(@us_army),
-    'polish air force generals rank' => test_zci(@pl_af),
-    'polish air force officer rank'  => test_zci(@pl_af),
+    'us army chief ranks'   => test_zci(@us_army),
+    'us army warrant rank'  => test_zci(@us_army),
+    'us army enlisted rank' => test_zci(@us_army),
+    'polish air force officer rank' => test_zci(@pl_af),
 
     # Keyword "rank" variations.
     'us army rank structure' => test_zci(@us_army),
     'us army rates'          => test_zci(@us_army),
     'polish air force rank insignias' => test_zci(@pl_af),
-    'polish air force symbols' => test_zci(@pl_af),
+    'polish air force symbols'        => test_zci(@pl_af),
     
     # Scroll to rank included in query.
-    'united states army rank captain' => test_zci(@us_army_cpt),
-    'united states army rank col' => test_zci(@us_army_col),
+    'united states army rank captain'  => test_zci(@us_army_cpt),
+    'united states army rank col'      => test_zci(@us_army_col),
+    'united states army rank sergeant' => test_zci(@us_army_sgt),
+    'us army chief warrant officer rank' => test_zci(@us_army_cw5),
+    'polish air force generals rank'     => test_zci(@pl_af_gen),
+    'us army colonel rank' => test_zci(@us_army_col),
+    'us army rank colonel' => test_zci(@us_army_col),
+    'us army colonel rank insignia' => test_zci(@us_army_col),
+    'us army colonel rank logo'     => test_zci(@us_army_col),
+    'us army colonel rank symbol'   => test_zci(@us_army_col),
 
     # Queries that do not trigger MilitaryRank:
     # - Improper order.
     'rank us army' => undef,
     # - Improper spelling.
     'us militray rank' => undef,
-    # - Invalid optional rank/grade.
-    'us army chief ranks' => undef,
     # - Country not yet included.
     'australian army rank' => undef,
     # - Rank structure not yet included.
