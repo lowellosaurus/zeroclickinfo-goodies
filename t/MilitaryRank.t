@@ -16,7 +16,7 @@ my @us_army = (
     structured_answer => {
         meta => {
             sourceName   => 'Wikipedia',
-            sourceUrl    => 'http://wikipedia.org/wiki/United_States_Army_enlisted_rank_insignia'
+            sourceUrl    => 'http://wikipedia.org/wiki/United_States_Army_enlisted_rank_insignia',
             selectedItem => -1,
             scrollToSelectedItem => 1
         },
