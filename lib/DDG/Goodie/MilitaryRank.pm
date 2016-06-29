@@ -44,7 +44,7 @@ my $PATTERNS = {
         warrant  => '(?:chiefs?\s+)?warrants?(?:\s+officers?)?',
         officer  => 'officers?|generals?(?:\s+officers?)?',
     },
-    keywords => [('rank structure', 'rank', 'ranks', 'rate', 'rates', 'insignia', 'insignias', 'symbols')],
+    keywords => [('rank', 'ranks', 'rate', 'rates', 'rank structure', 'insignia', 'insignias', 'symbols')],
 };
 
 my $country_pat = join '|', values %{$PATTERNS->{countries}};
@@ -61,13 +61,14 @@ handle words => sub {
 
     return unless $branch;
 
+    my $selected_item_index = -1;
+
     # TODO: Localize this default to the country of the searcher.
     $country = 'us' unless $country; # Default $country to us. 
     $country = get_key_from_pattern_hash($PATTERNS->{countries}, $country);
     $branch  = get_key_from_pattern_hash($PATTERNS->{branches}, $branch);
 
     my $structured_answer = $DATA->{$country}->{$branch};
-    my $selected_item_index = -1;
     for my $i (0 .. $#{$structured_answer->{data}}) {
         last unless $structured_answer->{data}->[$i];
     
